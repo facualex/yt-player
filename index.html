@@ -11,10 +11,11 @@
                 justify-content: center;
                 align-items: center;
                 min-width: 2rem;
-                padding: 0.5rem 3rem;
+                padding: 0.8rem 3rem;
                 background-color: #627aad;
                 color: white;
                 cursor: pointer;
+                margin: 1rem 0;
             }
 
             .state-icon {
@@ -25,20 +26,6 @@
         <title>Document</title>
     </head>
     <body>
-        <div
-            data-video="dgN_IZvnBC4"
-            data-autoplay="0"
-            data-loop="1"
-            id="youtube-audio"
-            class="audio-button"
-        >
-            <img
-                src="resources/play-solid.svg"
-                class="state-icon"
-                id="state-icon"
-            />
-            Reproducir
-        </div>
         <div
             data-video="pIqztdNy6lI"
             data-autoplay="0"
@@ -51,7 +38,7 @@
                 class="state-icon"
                 id="state-icon"
             />
-            Reproducir
+            <span id="player-state">Reproducir</span>
         </div>
 
         <script src="https://www.youtube.com/iframe_api"></script>

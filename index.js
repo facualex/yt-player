@@ -31,16 +31,32 @@ function createPlayer(
     activePlayerInstances,
     activePlayerInstancesByVideoCode,
 ) {
-    function onPlay(playing) {
-        // do something
+    const { CUED, ENDED, BUFFERING, PLAYING } = getPlayerStates(YT);
+    var ytPlayer;
+    var parentButton;
+
+    if (target.id === 'youtube-audio') {
+        parentButton = target;
+    } else {
+        parentButton = target.parentElement;
     }
 
-    console.log(activePlayerInstances);
-    console.log(activePlayerInstancesByVideoCode);
+    const videoCode = parentButton.getAttribute('data-video');
+    const stateIcon = parentButton.querySelector('#state-icon');
+    const playerStateText = parentButton.querySelector('#player-state');
 
-    const videoCode = target.getAttribute('data-video');
-    var ytPlayer;
-    const { CUED, ENDED, BUFFERING, PLAYING } = getPlayerStates(YT);
+    function onPlay(playerState) {
+        if (playerState === PLAYING) {
+            stateIcon.src = '/resources/pause-solid.svg';
+            playerStateText.innerText = 'Pausar';
+        } else if (playerState === ENDED) {
+            stateIcon.src = '/resources/play-solid.svg';
+            playerStateText.innerText = 'Reproducir';
+        } else if ([BUFFERING, CUED].includes(playerState)) {
+            stateIcon.src = '/resources/pause-solid.svg';
+            playerStateText.innerText = 'Cargando...';
+        }
+    }
 
     if (activePlayerInstances.includes(videoCode)) {
         // No crear instancia, esto significa que este player ya fue creado
@@ -48,9 +64,9 @@ function createPlayer(
     } else {
         const player = document.createElement('div');
         player.setAttribute('id', `youtube-player-${videoCode}`);
-        target.appendChild(player);
+        parentButton.appendChild(player);
 
-        const { video: videoId, autoplay, loop } = target.dataset;
+        const { video: videoId, autoplay, loop } = parentButton.dataset;
 
         ytPlayer = new YT.Player(`youtube-player-${videoCode}`, {
             height: '0',
@@ -63,10 +79,11 @@ function createPlayer(
             events: {
                 onReady: () => {
                     ytPlayer.setPlaybackQuality('small');
-                    onPlay(ytPlayer.getPlayerState() !== CUED);
+                    ytPlayer.playVideo();
+                    onPlay(ytPlayer.getPlayerState());
                 },
                 onStateChange: (event) => {
-                    event.data === ENDED ? onPlay(false) : null;
+                    event.data ? onPlay(event.data) : null;
                 },
             },
         });
@@ -75,12 +92,10 @@ function createPlayer(
         activePlayerInstancesByVideoCode[videoCode] = ytPlayer;
     }
 
-    console.log(ytPlayer);
-
     ytPlayer.getPlayerState() === PLAYING ||
     ytPlayer.getPlayerState() === BUFFERING
-        ? (ytPlayer.pauseVideo(), onPlay(false))
-        : (ytPlayer.playVideo(), onPlay(true));
+        ? (ytPlayer.pauseVideo(), onPlay(ENDED))
+        : (ytPlayer.playVideo(), onPlay(PLAYING));
 }
 
 // The Youtube IFrame Player API calls this function
