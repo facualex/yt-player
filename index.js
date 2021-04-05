@@ -47,19 +47,18 @@ function createPlayer(
 
     function onPlay(playerState) {
         if (playerState === PLAYING) {
-            stateIcon.src = '/resources/pause-solid.svg';
             playerStateText.innerText = 'Pausar';
-        } else if (playerState === ENDED) {
-            stateIcon.src = '/resources/play-solid.svg';
-            playerStateText.innerText = 'Reproducir';
-        } else if ([BUFFERING, CUED].includes(playerState)) {
             stateIcon.src = '/resources/pause-solid.svg';
+        } else if (playerState === ENDED) {
+            playerStateText.innerText = 'Reproducir';
+            stateIcon.src = '/resources/play-solid.svg';
+        } else if ([BUFFERING, CUED].includes(playerState)) {
             playerStateText.innerText = 'Cargando...';
+            stateIcon.src = '/resources/pause-solid.svg';
         }
     }
 
     if (activePlayerInstances.includes(videoCode)) {
-        // No crear instancia, esto significa que este player ya fue creado
         ytPlayer = activePlayerInstancesByVideoCode[videoCode];
     } else {
         const player = document.createElement('div');
@@ -101,26 +100,39 @@ function createPlayer(
 // The Youtube IFrame Player API calls this function
 // after its successfully loaded
 function onYouTubeIframeAPIReady() {
+    // Structures that keep track of the created player instances
     const activePlayerInstances = [];
     const activePlayerInstancesByVideoCode = {};
 
     addClickListeners(activePlayerInstances, activePlayerInstancesByVideoCode);
 }
 
-// Al hacer click se debe crear recién el player para ese elemento en puntual y asociarle logica
-// de detención y play
 function addClickListeners(
     activePlayerInstances,
     activePlayerInstancesByVideoCode,
 ) {
     const playableElements = document.querySelectorAll('#youtube-audio');
-    playableElements.forEach((element) =>
+
+    playableElements.forEach((element) => {
+        console.log(element);
+        // Create and append button and image
+        const stateIcon = document.createElement('img');
+        stateIcon.src = 'resources/play-solid.svg';
+        stateIcon.classList.add('state-icon');
+        stateIcon.id = 'state-icon';
+        element.appendChild(stateIcon);
+
+        const stateText = document.createElement('span');
+        stateText.innerText = 'Reproducir';
+        stateText.id = 'player-state';
+        element.appendChild(stateText);
+
         element.addEventListener('click', ({ target }) =>
             createPlayer(
                 target,
                 activePlayerInstances,
                 activePlayerInstancesByVideoCode,
             ),
-        ),
-    );
+        );
+    });
 }
