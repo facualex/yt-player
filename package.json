@@ -1,6 +1,9 @@
 {
-  "devDependencies": {
-    "eslint": "^7.23.0",
-    "prettier": "^2.2.1"
-  }
+    "devDependencies": {
+        "eslint": "^7.23.0",
+        "prettier": "^2.2.1"
+    },
+    "scripts": {
+        "sass": "sass --watch style.scss style.css"
+    }
 }

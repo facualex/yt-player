@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            .audio-button {
+                width: 4rem;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-width: 2rem;
+                padding: 0.5rem 3rem;
+                background-color: #627aad;
+                color: white;
+                cursor: pointer;
+            }
+
+            .state-icon {
+                width: 1rem;
+                margin-right: 8px;
+            }
+        </style>
+        <title>Document</title>
+    </head>
+    <body>
+        <div
+            data-video="dgN_IZvnBC4"
+            data-autoplay="0"
+            data-loop="1"
+            id="youtube-audio"
+            class="audio-button"
+        >
+            <img
+                src="resources/play-solid.svg"
+                class="state-icon"
+                id="state-icon"
+            />
+            Reproducir
+        </div>
+        <script src="https://www.youtube.com/iframe_api"></script>
+        <script src="./index.js"></script>
+    </body>
+</html>
