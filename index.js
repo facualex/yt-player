@@ -48,13 +48,13 @@ function createPlayer(
     function onPlay(playerState) {
         if (playerState === PLAYING) {
             playerStateText.innerText = 'Pausar';
-            stateIcon.src = '/resources/pause-solid.svg';
+            stateIcon.src = 'resources/pause-solid.svg';
         } else if (playerState === ENDED) {
             playerStateText.innerText = 'Reproducir';
-            stateIcon.src = '/resources/play-solid.svg';
+            stateIcon.src = 'resources/play-solid.svg';
         } else if ([BUFFERING, CUED].includes(playerState)) {
             playerStateText.innerText = 'Cargando...';
-            stateIcon.src = '/resources/pause-solid.svg';
+            stateIcon.src = 'resources/pause-solid.svg';
         }
     }
 
