@@ -114,7 +114,6 @@ function addClickListeners(
     const playableElements = document.querySelectorAll('#youtube-audio');
 
     playableElements.forEach((element) => {
-        console.log(element);
         // Create and append button and image
         const stateIcon = document.createElement('img');
         stateIcon.src = 'resources/play-solid.svg';
