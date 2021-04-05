@@ -8,9 +8,16 @@
 
  Refactored by: Facundo Alexandre
  Github: github.com/facualex
+
+ The original code was refactored with cleaner code and modified for the purpose of having multiple
+ player sources
 */
 
 function getPlayerStates(YoutubeAPIInstance) {
+    if (!YoutubeAPIInstance) {
+        return null;
+    }
+
     return {
         BUFFERING: YoutubeAPIInstance.PlayerState.BUFFERING,
         PLAYING: YoutubeAPIInstance.PlayerState.PLAYING,
@@ -19,75 +26,56 @@ function getPlayerStates(YoutubeAPIInstance) {
     };
 }
 
-function createPlayers(htmlPlayableElements) {
-    function onPlay(playing, playIcon) {
+function createPlayer(
+    target,
+    activePlayerInstances,
+    activePlayerInstancesByVideoCode,
+) {
+    function onPlay(playing) {
         // do something
     }
 
-    htmlPlayableElements.forEach((element, index) => {
-        const player = document.createElement('div');
-        player.setAttribute('id', `youtube-player-${index}`);
-        element.appendChild(player);
+    console.log(activePlayerInstances);
+    console.log(activePlayerInstancesByVideoCode);
 
-        const ytPlayer = new YT.Player(`youtube-player-${index}`, {
+    const videoCode = target.getAttribute('data-video');
+    var ytPlayer;
+    const { CUED, ENDED, BUFFERING, PLAYING } = getPlayerStates(YT);
+
+    if (activePlayerInstances.includes(videoCode)) {
+        // No crear instancia, esto significa que este player ya fue creado
+        ytPlayer = activePlayerInstancesByVideoCode[videoCode];
+    } else {
+        const player = document.createElement('div');
+        player.setAttribute('id', `youtube-player-${videoCode}`);
+        target.appendChild(player);
+
+        const { video: videoId, autoplay, loop } = target.dataset;
+
+        ytPlayer = new YT.Player(`youtube-player-${videoCode}`, {
             height: '0',
             width: '0',
-            videoId: element.dataset.video,
+            videoId,
             playerVars: {
-                autoplay: element.dataset.autoplay,
-                loop: element.dataset.loop,
+                autoplay,
+                loop,
             },
             events: {
                 onReady: () => {
                     ytPlayer.setPlaybackQuality('small');
-                    onPlay(ytPlayer.getPlayerState() !== playerStates.CUED);
+                    onPlay(ytPlayer.getPlayerState() !== CUED);
                 },
                 onStateChange: (event) => {
-                    event.data === playerStates.ENDED && onPlay(false);
+                    event.data === ENDED ? onPlay(false) : null;
                 },
             },
         });
 
-        element.onclick = () => {
-            ytPlayer.getPlayerState() === playerStates.PLAYING ||
-            ytPlayer.getPlayerState() === playerStates.BUFFERING
-                ? (ytPlayer.pauseVideo(), onPlay(false))
-                : (ytPlayer.playVideo(), onPlay(true));
-        };
-    });
-}
-
-function createPlayer(target) {
-    const videoCode = target.getAttribute('data-video');
-
-    const { CUED, ENDED, BUFFERING, PLAYING } = getPlayerStates(YT);
-
-    function onPlay(playing, playIcon) {
-        // do something
+        activePlayerInstances.push(videoCode);
+        activePlayerInstancesByVideoCode[videoCode] = ytPlayer;
     }
 
-    const player = document.createElement('div');
-    player.setAttribute('id', `youtube-player-${videoCode}`);
-    target.appendChild(player);
-
-    const ytPlayer = new YT.Player(`youtube-player-${videoCode}`, {
-        height: '0',
-        width: '0',
-        videoId: target.dataset.video,
-        playerVars: {
-            autoplay: target.dataset.autoplay,
-            loop: target.dataset.loop,
-        },
-        events: {
-            onReady: () => {
-                ytPlayer.setPlaybackQuality('small');
-                onPlay(ytPlayer.getPlayerState() !== CUED);
-            },
-            onStateChange: (event) => {
-                event.data === ENDED && onPlay(false);
-            },
-        },
-    });
+    console.log(ytPlayer);
 
     ytPlayer.getPlayerState() === PLAYING ||
     ytPlayer.getPlayerState() === BUFFERING
@@ -98,17 +86,26 @@ function createPlayer(target) {
 // The Youtube IFrame Player API calls this function
 // after its successfully loaded
 function onYouTubeIframeAPIReady() {
-    addClickListeners();
+    const activePlayerInstances = [];
+    const activePlayerInstancesByVideoCode = {};
 
-    //const playableElements = document.querySelectorAll('#youtube-audio');
-    //createPlayers(playableElements);
+    addClickListeners(activePlayerInstances, activePlayerInstancesByVideoCode);
 }
 
 // Al hacer click se debe crear recién el player para ese elemento en puntual y asociarle logica
 // de detención y play
-function addClickListeners() {
+function addClickListeners(
+    activePlayerInstances,
+    activePlayerInstancesByVideoCode,
+) {
     const playableElements = document.querySelectorAll('#youtube-audio');
-    playableElements.forEach((element) => {
-        element.addEventListener('click', ({ target }) => createPlayer(target));
-    });
+    playableElements.forEach((element) =>
+        element.addEventListener('click', ({ target }) =>
+            createPlayer(
+                target,
+                activePlayerInstances,
+                activePlayerInstancesByVideoCode,
+            ),
+        ),
+    );
 }
